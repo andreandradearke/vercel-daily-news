@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import BreakingNewsBanner from "@/components/breaking-news-banner/BreakingNewsBanner";
 import FeaturedArticles from "@/components/featured-articles/featured-articles";
 import DefaultHero from "@/components/heroes/DefaultHero";
+import ArticleGridSkeleton from '@/components/skeletons/ArticleGridSkeleton';
 
 function BreakingNewsSkeleton() {
     return (
@@ -19,15 +20,7 @@ function FeaturedArticlesSkeleton() {
             <h2 className="text-2xl font-bold mb-6">Featured</h2>
             <p className="text-gray-600 mb-8">Hand-picked stories from the team</p>
             <div className="grid gap-8 md:grid-cols-3">
-                {[1, 2, 3].map((i) => (
-                    <div key={i} className="border rounded-lg overflow-hidden shadow-sm animate-pulse">
-                        <div className="w-full h-48 bg-gray-200" />
-                        <div className="p-4">
-                            <div className="h-6 bg-gray-200 rounded mb-2" />
-                            <div className="h-4 bg-gray-200 rounded" />
-                        </div>
-                    </div>
-                ))}
+                <ArticleGridSkeleton count={3} />
             </div>
         </section>
     );

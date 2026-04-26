@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import ArticleGridSkeleton from '@/components/skeletons/ArticleGridSkeleton';
 import { formatCategory, formatDate } from '@/lib/utils';
 
 interface Article {
@@ -46,15 +47,7 @@ export default function FeaturedArticles() {
             </div>
             <div className="grid gap-8 md:grid-cols-3">
                 {isLoading ? (
-                    [1, 2, 3].map((i) => (
-                        <div key={i} className="border rounded-lg overflow-hidden shadow-sm animate-pulse">
-                            <div className="w-full h-48 bg-gray-200" />
-                            <div className="p-4">
-                                <div className="h-6 bg-gray-200 rounded mb-2" />
-                                <div className="h-4 bg-gray-200 rounded" />
-                            </div>
-                        </div>
-                    ))
+                    <ArticleGridSkeleton count={3} />
                 ) : (
                     articles.map((article, index) => (
                         <Link key={article.id} href={`/articles/${article.slug}`} className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">

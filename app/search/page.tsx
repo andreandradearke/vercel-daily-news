@@ -1,6 +1,7 @@
 'use client';
 
 import Search from '@/page-components/Search';
+import ArticleGridSkeleton from '@/components/skeletons/ArticleGridSkeleton';
 import { Suspense } from 'react';
 
 function SearchFallback() {
@@ -11,15 +12,7 @@ function SearchFallback() {
                 <div className="animate-pulse">
                     <div className="h-12 bg-gray-200 rounded mb-8" />
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        {[1, 2, 3].map((i) => (
-                            <div key={i} className="border rounded-lg overflow-hidden shadow-sm">
-                                <div className="w-full h-48 bg-gray-200" />
-                                <div className="p-4">
-                                    <div className="h-4 bg-gray-200 rounded mb-2" />
-                                    <div className="h-6 bg-gray-200 rounded" />
-                                </div>
-                            </div>
-                        ))}
+                        <ArticleGridSkeleton count={3} />
                     </div>
                 </div>
             </div>

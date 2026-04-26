@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { formatCategory, formatDate } from '@/lib/utils';
+import ArticleGridSkeleton from '@/components/skeletons/ArticleGridSkeleton';
 
 interface Article {
     id: string;
@@ -168,16 +169,7 @@ export default function Search() {
                 {/* Loading State */}
                 {isLoading && (
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        {[1, 2, 3, 4, 5].map((i) => (
-                            <div key={i} className="border rounded-lg overflow-hidden shadow-sm animate-pulse">
-                                <div className="w-full h-48 bg-gray-200" />
-                                <div className="p-4">
-                                    <div className="h-4 bg-gray-200 rounded mb-2" />
-                                    <div className="h-6 bg-gray-200 rounded mb-2" />
-                                    <div className="h-4 bg-gray-200 rounded" />
-                                </div>
-                            </div>
-                        ))}
+                        <ArticleGridSkeleton count={5} />
                     </div>
                 )}
 
