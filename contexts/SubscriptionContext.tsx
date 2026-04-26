@@ -7,7 +7,6 @@ interface SubscriptionContextType {
     isLoading: boolean;
     subscribe: () => Promise<void>;
     unsubscribe: () => Promise<void>;
-    checkStatus: () => Promise<void>;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
@@ -105,8 +104,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
                 isSubscribed,
                 isLoading,
                 subscribe,
-                unsubscribe,
-                checkStatus
+                unsubscribe
             }}
         >
             {children}

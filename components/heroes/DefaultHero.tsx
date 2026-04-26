@@ -1,14 +1,13 @@
 import LinkButton from '../buttons/LinkButton';
+import SubscribeButton from '../buttons/SubscribeButton';
 import Image from 'next/image';
 
 interface DefaultHeroProps {
     eyebrow: string;
     headline: string;
     description: string;
-    primaryButtonText: string;
-    primaryButtonHref: string;
-    secondaryButtonText: string;
-    secondaryButtonHref: string;
+    ctaButtonText: string;
+    ctaButtonHref: string;
     backgroundImage?: string;
 }
 
@@ -16,10 +15,8 @@ export default function DefaultHero({
     eyebrow,
     headline,
     description,
-    primaryButtonText,
-    primaryButtonHref,
-    secondaryButtonText,
-    secondaryButtonHref,
+    ctaButtonText,
+    ctaButtonHref,
     backgroundImage
 }: DefaultHeroProps) {
 
@@ -42,8 +39,8 @@ export default function DefaultHero({
                 <h1 className="text-3xl lg:text-4xl font-bold">{headline}</h1>
                 <p className="text-sm text-gray-400">{description}</p>
                 <div className="flex gap-4">
-                    <LinkButton text={primaryButtonText} type="primary" href={primaryButtonHref} />
-                    <LinkButton text={secondaryButtonText} type="secondary" href={secondaryButtonHref} />
+                    <LinkButton text={ctaButtonText} type="secondary" href={ctaButtonHref} />
+                    <SubscribeButton size="md" />
                 </div>
             </div>
         </section>

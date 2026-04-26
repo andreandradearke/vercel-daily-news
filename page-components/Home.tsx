@@ -36,10 +36,8 @@ export default function Home() {
                 eyebrow="The Vercel Daily"
                 headline="News and Insights for modern web developers."
                 description="Changelogs, engineering deep-dives, customer stories and community updates - all in one place."
-                primaryButtonText="Browse Articles"
-                primaryButtonHref="/search"
-                secondaryButtonText="Subscribe"
-                secondaryButtonHref="/subscribe"
+                ctaButtonText="Browse Articles"
+                ctaButtonHref="/search"
             // backgroundImage="https://images.pexels.com/photos/29491832/pexels-photo-29491832.jpeg"
             />
             <Suspense fallback={<FeaturedArticlesSkeleton />}>

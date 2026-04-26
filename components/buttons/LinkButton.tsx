@@ -15,7 +15,7 @@ export default function LinkButton({ text, type, href }: LinkButtonProps) {
     return (
         <Link href={href} className={`${baseClasses} ${typeClasses} cursor-pointer`}>
             {text}
-            {type === 'primary' && <span> &#129106;</span>}
+            {type === 'secondary' && <span> &#129106;</span>}
         </Link>
     );
 }
