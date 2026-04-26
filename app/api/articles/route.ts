@@ -25,7 +25,6 @@ export async function GET(request: NextRequest) {
         }
 
         const data = await response.json();
-        console.log('API proxy response:', data);
         return NextResponse.json(data);
     } catch (error) {
         console.error('API proxy error:', error);
