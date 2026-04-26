@@ -87,6 +87,7 @@ export default function FeaturedArticles() {
                                 src={article.image || "https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg"}
                                 alt={article.title}
                                 fill
+                                sizes="(max-width: 768px) 100vw, 33vw"
                                 className="object-cover"
                                 priority={index === 0}
                             />
