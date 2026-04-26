@@ -1,8 +1,17 @@
-'use client';
-
+import type { Metadata } from "next";
 import Search from '@/page-components/Search';
 import ArticleGridSkeleton from '@/components/skeletons/ArticleGridSkeleton';
 import { Suspense } from 'react';
+
+export const metadata: Metadata = {
+    title: "Search Articles",
+    description: "Search and filter articles by category. Find the latest news and insights for web developers.",
+    openGraph: {
+        title: "Search Articles | Vercel Daily News",
+        description: "Search and filter articles by category.",
+        type: "website"
+    }
+};
 
 function SearchFallback() {
     return (

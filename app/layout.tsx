@@ -5,8 +5,18 @@ import DefaultHeader from "@/components/headers/DefaultHeader";
 import { Providers } from "@/components/providers/Providers";
 
 export const metadata: Metadata = {
-  title: "Vercel Daily News",
-  description: "Nextjs certification assessment project",
+  title: {
+    default: "Vercel Daily News",
+    template: "%s | Vercel Daily News"
+  },
+  description: "News and insights for modern web developers. Changelogs, engineering deep-dives, customer stories and community updates.",
+  openGraph: {
+    title: "Vercel Daily News",
+    description: "News and insights for modern web developers. Changelogs, engineering deep-dives, customer stories and community updates.",
+    type: "website",
+    locale: "en_US",
+    siteName: "Vercel Daily News"
+  }
 };
 
 export default function RootLayout({
