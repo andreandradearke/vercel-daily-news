@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { formatCategory, formatDate } from '@/lib/utils';
 
 interface Article {
     id: string;
@@ -12,19 +13,6 @@ interface Article {
     slug: string;
     category: string;
     publishedAt: string;
-}
-
-function formatCategory(category: string): string {
-    return category.replace(/-/g, ' ').toUpperCase();
-}
-
-function formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-    });
 }
 
 export default function FeaturedArticles() {

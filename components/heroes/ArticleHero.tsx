@@ -1,3 +1,5 @@
+import { formatCategory, formatDate } from '@/lib/utils';
+
 interface ArticleHeroProps {
     title: string;
     author: {
@@ -5,19 +7,6 @@ interface ArticleHeroProps {
     };
     publishedAt: string;
     category: string;
-}
-
-function formatCategory(category: string): string {
-    return category.replace(/-/g, ' ').toUpperCase();
-}
-
-function formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric'
-    });
 }
 
 export default function ArticleHero({

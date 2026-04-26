@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { formatCategory } from '@/lib/utils';
 
 interface BreakingNews {
     id: string;
@@ -10,10 +11,6 @@ interface BreakingNews {
     category: string;
     publishedAt: string;
     urgent: boolean;
-}
-
-function formatCategory(category: string): string {
-    return category.replace(/-/g, ' ').toUpperCase();
 }
 
 export default function BreakingNewsBanner() {

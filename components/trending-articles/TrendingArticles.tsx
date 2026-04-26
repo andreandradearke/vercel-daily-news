@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { formatCategory } from '@/lib/utils';
 
 interface Article {
     id: string;
@@ -12,10 +13,6 @@ interface Article {
     slug: string;
     category: string;
     publishedAt: string;
-}
-
-function formatCategory(category: string): string {
-    return category.replace(/-/g, ' ').toUpperCase();
 }
 
 interface TrendingArticlesProps {
