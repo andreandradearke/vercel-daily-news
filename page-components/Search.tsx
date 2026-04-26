@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { formatCategory, formatDate } from '@/lib/utils';
 import { SEARCH_CONFIG } from '@/lib/search-config';
@@ -34,6 +34,12 @@ export default function Search() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [hasSearched, setHasSearched] = useState(false);
+
+    // Track initial values to prevent auto-search on mount
+    const initialValues = useRef({
+        searchTerm: searchParams.get('q') || '',
+        category: searchParams.get('category') || ''
+    });
 
     // Fetch categories for the dropdown
     useEffect(() => {
@@ -85,15 +91,21 @@ export default function Search() {
         }
     }, []);
 
-    // Initial load
+    // Initial search on mount only
     useEffect(() => {
-        const urlSearch = searchParams.get('q') || '';
-        const urlCategory = searchParams.get('category') || '';
-        performSearch(urlSearch, urlCategory);
-    }, [searchParams, performSearch]);
+        performSearch(initialValues.current.searchTerm, initialValues.current.category);
+    }, [performSearch]);
 
-    // Auto-search after minimum characters
+    // Auto-search when user types (skip if values haven't changed from initial)
     useEffect(() => {
+        const hasChanged =
+            searchTerm !== initialValues.current.searchTerm ||
+            category !== initialValues.current.category;
+
+        if (!hasChanged) {
+            return;
+        }
+
         if (searchTerm.length >= SEARCH_CONFIG.MIN_SEARCH_LENGTH || searchTerm.length === 0) {
             const timeoutId = setTimeout(() => {
                 updateURL(searchTerm, category);
