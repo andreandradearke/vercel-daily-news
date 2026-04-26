@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { API_BASE_URL, API_HEADERS } from '@/lib/api-config';
 
 export async function GET(
-    request: Request,
+    _request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
@@ -10,7 +10,10 @@ export async function GET(
         
         const response = await fetch(`${API_BASE_URL}/articles/${id}`, {
             headers: API_HEADERS,
-            next: { revalidate: 300 }
+            next: { 
+                revalidate: 3600,
+                tags: ['articles', `article-${id}`]
+            }
         });
 
         if (!response.ok) {
@@ -21,7 +24,11 @@ export async function GET(
         }
 
         const data = await response.json();
-        return NextResponse.json(data);
+        return NextResponse.json(data, {
+            headers: {
+                'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200'
+            }
+        });
     } catch (error) {
         console.error('API proxy error:', error);
         return NextResponse.json(

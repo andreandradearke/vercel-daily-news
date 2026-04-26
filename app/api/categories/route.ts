@@ -5,7 +5,10 @@ export async function GET() {
     try {
         const response = await fetch(`${API_BASE_URL}/categories`, {
             headers: API_HEADERS,
-            next: { revalidate: 3600 } // Cache for 1 hour since categories don't change frequently
+            next: { 
+                revalidate: 3600,
+                tags: ['categories']
+            }
         });
 
         if (!response.ok) {
@@ -16,7 +19,11 @@ export async function GET() {
         }
 
         const data = await response.json();
-        return NextResponse.json(data);
+        return NextResponse.json(data, {
+            headers: {
+                'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200'
+            }
+        });
     } catch (error) {
         console.error('API proxy error:', error);
         return NextResponse.json(

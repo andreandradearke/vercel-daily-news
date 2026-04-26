@@ -7,9 +7,15 @@ export async function GET(request: NextRequest) {
         const queryString = searchParams.toString();
         const url = `${API_BASE_URL}/articles${queryString ? `?${queryString}` : ''}`;
 
+        const isSearch = searchParams.get('search') || searchParams.get('category');
+        const revalidateTime = isSearch ? 60 : 300;
+
         const response = await fetch(url, {
             headers: API_HEADERS,
-            next: { revalidate: 300 }
+            next: { 
+                revalidate: revalidateTime,
+                tags: ['articles']
+            }
         });
 
         if (!response.ok) {
@@ -20,7 +26,11 @@ export async function GET(request: NextRequest) {
         }
 
         const data = await response.json();
-        return NextResponse.json(data);
+        return NextResponse.json(data, {
+            headers: {
+                'Cache-Control': `public, s-maxage=${revalidateTime}, stale-while-revalidate=600`
+            }
+        });
     } catch (error) {
         console.error('API proxy error:', error);
         return NextResponse.json(
