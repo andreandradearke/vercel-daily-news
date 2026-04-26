@@ -3,6 +3,16 @@ import BreakingNewsBanner from "@/components/breaking-news-banner/BreakingNewsBa
 import FeaturedArticles from "@/components/featured-articles/featured-articles";
 import DefaultHero from "@/components/heroes/DefaultHero";
 
+function BreakingNewsSkeleton() {
+    return (
+        <div className="md:py-4 md:px-24 p-2 bg-black text-white">
+            <p className="flex gap-2 leading-tight text-sm items-center">
+                <span className="w-48 h-4 bg-gray-700 rounded animate-pulse" />
+            </p>
+        </div>
+    );
+}
+
 function FeaturedArticlesSkeleton() {
     return (
         <section className="py-12 px-4 md:px-24">
@@ -26,7 +36,9 @@ function FeaturedArticlesSkeleton() {
 export default function Home() {
     return (
         <>
-            <BreakingNewsBanner headline="Vercel CDN Node Collapses Over 3M Requests Per Day" featuredText="Breaking" />
+            <Suspense fallback={<BreakingNewsSkeleton />}>
+                <BreakingNewsBanner />
+            </Suspense>
             <DefaultHero
                 eyebrow="The Vercel Daily"
                 headline="News and Insights for modern web developers."
