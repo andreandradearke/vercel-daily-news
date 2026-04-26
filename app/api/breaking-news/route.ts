@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 const API_BASE_URL = 'https://vercel-daily-news-api.vercel.app/api';
 const API_HEADERS = {
@@ -6,7 +6,7 @@ const API_HEADERS = {
     'x-vercel-protection-bypass': 'OykROcuULI6YJwAwk3VnWv4gMMbpAq6q'
 };
 
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
         const response = await fetch(`${API_BASE_URL}/breaking-news`, {
             headers: API_HEADERS,
