@@ -306,10 +306,54 @@ npm run start        # Production server
 npm run lint         # ESLint
 ```
 
-**Configuration:**
-- API settings in `lib/api-config.ts`
+### Configuration Files
+
+> **Quick Start:** Copy `.env.sample` to `.env.local` and customize as needed. All variables are optional with sensible defaults.
+
+**API Configuration** (`lib/api-config.ts`)
 - `API_BASE_URL` - External API endpoint
 - `API_HEADERS` - Authentication headers
+
+**Search Configuration** (`lib/search-config.ts`)
+- `LIMIT` - Max search results (default: 5)
+- `MIN_SEARCH_LENGTH` - Minimum chars to trigger search (default: 3)
+- `DEBOUNCE_MS` - Delay before search executes (default: 500ms)
+
+**Cache Configuration** (`lib/cache-config.ts`)
+- ISR revalidation times for all endpoints
+- CDN stale-while-revalidate windows
+- Cache tags for on-demand revalidation
+
+### Environment Variables (Optional)
+
+Create `.env.local` to override defaults:
+
+```bash
+# Search Configuration (Client-side - requires NEXT_PUBLIC_ prefix)
+NEXT_PUBLIC_SEARCH_LIMIT=10
+NEXT_PUBLIC_SEARCH_MIN_LENGTH=2
+NEXT_PUBLIC_SEARCH_DEBOUNCE_MS=300
+
+# Cache Configuration (Server-side - no NEXT_PUBLIC_ prefix)
+# ISR Revalidation Times (seconds)
+CACHE_REVALIDATE_ARTICLES_INDIVIDUAL=3600
+CACHE_REVALIDATE_ARTICLES_LIST=300
+CACHE_REVALIDATE_ARTICLES_SEARCH=60
+CACHE_REVALIDATE_BREAKING_NEWS=300
+CACHE_REVALIDATE_CATEGORIES=3600
+
+# CDN Stale-While-Revalidate Times (seconds)
+CACHE_STALE_ARTICLES=7200
+CACHE_STALE_LISTS=600
+CACHE_STALE_BREAKING_NEWS=600
+CACHE_STALE_CATEGORIES=7200
+```
+
+**Benefits:**
+- Environment-specific tuning (dev/staging/production)
+- No code changes needed to adjust caching
+- Override via Vercel dashboard environment variables
+- Defaults ensure app works without configuration
 
 ---
 

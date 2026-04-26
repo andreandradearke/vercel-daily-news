@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { formatCategory, formatDate } from '@/lib/utils';
+import { SEARCH_CONFIG } from '@/lib/search-config';
 import ArticleGridSkeleton from '@/components/skeletons/ArticleGridSkeleton';
 
 interface Article {
@@ -65,7 +66,7 @@ export default function Search() {
 
         try {
             const params = new URLSearchParams();
-            params.set('limit', '5');
+            params.set('limit', String(SEARCH_CONFIG.LIMIT));
             if (search) params.set('search', search);
             if (cat) params.set('category', cat);
 
@@ -91,13 +92,13 @@ export default function Search() {
         performSearch(urlSearch, urlCategory);
     }, [searchParams, performSearch]);
 
-    // Auto-search after 3 characters
+    // Auto-search after minimum characters
     useEffect(() => {
-        if (searchTerm.length >= 3 || searchTerm.length === 0) {
+        if (searchTerm.length >= SEARCH_CONFIG.MIN_SEARCH_LENGTH || searchTerm.length === 0) {
             const timeoutId = setTimeout(() => {
                 updateURL(searchTerm, category);
                 performSearch(searchTerm, category);
-            }, 500); // Debounce
+            }, SEARCH_CONFIG.DEBOUNCE_MS);
 
             return () => clearTimeout(timeoutId);
         }

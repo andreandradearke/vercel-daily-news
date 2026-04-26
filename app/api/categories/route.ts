@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import { API_BASE_URL, API_HEADERS } from '@/lib/api-config';
+import { CACHE_CONFIG } from '@/lib/cache-config';
 
 export async function GET() {
     try {
         const response = await fetch(`${API_BASE_URL}/categories`, {
             headers: API_HEADERS,
             next: { 
-                revalidate: 3600,
-                tags: ['categories']
+                revalidate: CACHE_CONFIG.REVALIDATE.CATEGORIES,
+                tags: [CACHE_CONFIG.TAGS.CATEGORIES]
             }
         });
 
@@ -21,7 +22,7 @@ export async function GET() {
         const data = await response.json();
         return NextResponse.json(data, {
             headers: {
-                'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200'
+                'Cache-Control': `public, s-maxage=${CACHE_CONFIG.REVALIDATE.CATEGORIES}, stale-while-revalidate=${CACHE_CONFIG.STALE.CATEGORIES}`
             }
         });
     } catch (error) {
