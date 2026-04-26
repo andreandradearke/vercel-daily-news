@@ -41,27 +41,34 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
             if (statusResponse.ok) {
                 const statusData = await statusResponse.json();
+
+                // Already subscribed - no action needed
                 if (statusData.data?.status === 'active') {
                     setIsSubscribed(true);
                     return;
                 }
+                // Has token but inactive - will activate below
 
-            } else if (statusResponse.status !== 400) { // no token exists
+            } else if (statusResponse.status === 400) { // no token exists
                 const createResponse = await fetch('/api/subscription/create', {
                     method: 'POST'
                 });
 
                 if (!createResponse.ok) {
-                    throw new Error('Failed to create subscription');
+                    throw new Error('Failed to create subscription token');
                 }
+
+            } else {
+                const errorText = await statusResponse.text();
+                throw new Error(`Failed to check subscription status (${statusResponse.status}): ${errorText}`);
             }
 
             // Activate the subscription (either new or inactive)
-            const response = await fetch('/api/subscription', {
+            const activateResponse = await fetch('/api/subscription', {
                 method: 'POST'
             });
 
-            if (!response.ok) {
+            if (!activateResponse.ok) {
                 throw new Error('Failed to activate subscription');
             }
 
