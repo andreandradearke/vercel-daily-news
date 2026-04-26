@@ -1,10 +1,5 @@
 import { NextResponse } from 'next/server';
-
-const API_BASE_URL = 'https://vercel-daily-news-api.vercel.app/api';
-const API_HEADERS = {
-    'accept': 'application/json',
-    'x-vercel-protection-bypass': 'OykROcuULI6YJwAwk3VnWv4gMMbpAq6q'
-};
+import { API_BASE_URL, API_HEADERS } from '@/lib/api-config';
 
 export async function GET() {
     try {
