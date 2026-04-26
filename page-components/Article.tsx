@@ -5,7 +5,8 @@ import { useEffect, useState } from 'react';
 import { notFound } from 'next/navigation';
 import ArticleHero from '@/components/heroes/ArticleHero';
 import TrendingArticles from '@/components/trending-articles/TrendingArticles';
-import SubscribeCTA from '@/components/subscribe-cta/SubscribeCTA';
+import Paywall from '@/components/paywall/Paywall';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 
 interface ContentBlock {
     type: string;
@@ -81,7 +82,7 @@ export default function Article({ slug }: ArticleProps) {
     const [article, setArticle] = useState<Article | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [articleNotFound, setArticleNotFound] = useState(false);
-    const [isSubscribed] = useState(false); // TODO: Implement subscription check
+    const { isSubscribed, isLoading: isSubscriptionLoading } = useSubscription();
 
     useEffect(() => {
         async function loadArticle() {
@@ -110,7 +111,7 @@ export default function Article({ slug }: ArticleProps) {
         notFound();
     }
 
-    if (isLoading) {
+    if (isLoading || isSubscriptionLoading) {
         return (
             <div className="animate-pulse">
                 <section className="py-8 px-4 md:px-24">
@@ -129,8 +130,15 @@ export default function Article({ slug }: ArticleProps) {
         );
     }
 
+    if (!article) {
+        return null;
+    }
+
+    // Extract teaser from first paragraph for paywall
+    const teaser = article.content.find(block => block.type === 'paragraph')?.text || article.excerpt;
+
     return (
-        article && <>
+        <>
             <ArticleHero
                 title={article.title}
                 author={article.author}
@@ -153,17 +161,24 @@ export default function Article({ slug }: ArticleProps) {
                 </div>
             </section>
 
-            <section className="px-4 md:px-24 mb-12">
-                <div className="max-w-3xl mx-auto">
-                    <div className="prose prose-lg max-w-none">
-                        {article.content.map((block, index) => renderContentBlock(block, index))}
-                    </div>
-                </div>
-            </section>
+            {isSubscribed ? (
+                <>
+                    <section className="px-4 md:px-24 mb-12">
+                        <div className="max-w-3xl mx-auto">
+                            <div className="prose prose-lg max-w-none">
+                                {article.content.map((block, index) => renderContentBlock(block, index))}
+                            </div>
+                        </div>
+                    </section>
 
-            {!isSubscribed && <SubscribeCTA />}
-
-            <TrendingArticles excludeSlug={article.slug} />
+                    <TrendingArticles excludeSlug={article.slug} />
+                </>
+            ) : (
+                <>
+                    <Paywall articleTitle={article.title} teaser={teaser} />
+                    <TrendingArticles excludeSlug={article.slug} />
+                </>
+            )}
         </>
     );
 }

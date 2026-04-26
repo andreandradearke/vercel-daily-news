@@ -1,7 +1,10 @@
-import Article from '@/pages/Article';
+'use client';
 
-export default async function ArticlePage({ params }: { params: Promise<{ slug: string[] }> }) {
-    const { slug } = await params;
+import Article from '@/page-components/Article';
+import { use } from 'react';
+
+export default function ArticlePage({ params }: { params: Promise<{ slug: string[] }> }) {
+    const { slug } = use(params);
     const articleSlug = slug.join('/');
 
     return <Article slug={articleSlug} />;

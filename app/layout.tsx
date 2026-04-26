@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import DefaultFooter from "@/components/footers/DefaultFooter";
 import DefaultHeader from "@/components/headers/DefaultHeader";
+import { Providers } from "@/components/providers/Providers";
 
 export const metadata: Metadata = {
   title: "Vercel Daily News",
@@ -18,11 +19,13 @@ export default function RootLayout({
       lang="en"
     >
       <body className="flex flex-col min-h-screen box-border">
-        <DefaultHeader />
-        <main className="flex-1">
-          {children}
-        </main>
-        <DefaultFooter />
+        <Providers>
+          <DefaultHeader />
+          <main className="flex-1">
+            {children}
+          </main>
+          <DefaultFooter />
+        </Providers>
       </body>
     </html>
   );
