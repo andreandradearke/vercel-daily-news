@@ -175,7 +175,7 @@ export default function Article({ slug }: ArticleProps) {
                 </>
             ) : (
                 <>
-                    <Paywall articleTitle={article.title} teaser={teaser} />
+                    <Paywall teaser={teaser} />
                     <TrendingArticles excludeSlug={article.slug} />
                 </>
             )}

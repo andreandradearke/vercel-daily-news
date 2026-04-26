@@ -4,11 +4,10 @@ import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useState } from 'react';
 
 interface PaywallProps {
-    articleTitle: string;
     teaser: string;
 }
 
-export default function Paywall({ articleTitle, teaser }: PaywallProps) {
+export default function Paywall({ teaser }: PaywallProps) {
     const { subscribe } = useSubscription();
     const [isSubscribing, setIsSubscribing] = useState(false);
 
