@@ -45,7 +45,9 @@ Next.js 16.2.3 news website with subscription paywall and optimized caching.
 - Subscribe CTA Section
 
 **Implementation:**
-- Dynamic catch-all routes
+- Dynamic catch-all routes with **static generation** (top 50 articles pre-rendered)
+- `generateStaticParams` pre-renders 20 featured + 30 trending articles at build time
+- Non-pre-rendered articles render on-demand (Next.js 16 default behavior)
 - Conditional rendering based on subscription status
 - generateMetadata for SEO/Open Graph
 - Cache: 1 hour revalidation, 2 hour stale-while-revalidate
@@ -75,19 +77,22 @@ Next.js 16.2.3 news website with subscription paywall and optimized caching.
 **Architecture:**
 - httpOnly cookies (secure, 15-day expiration)
 - React Context (global subscription state)
-- API endpoints: create, activate, deactivate, check status
+- **Server Actions** (`app/actions/subscription.ts`) for mutations
 - Smart toggle button (shows current state with checkmark ✓)
+- Automatic recovery from invalid/expired tokens (404 handling)
 
 **User Flow:**
-1. Click "Subscribe" → POST `/api/subscription/create`
+1. Click "Subscribe" → Server Action `subscribe()`
 2. Server generates token → Sets httpOnly cookie
 3. Context updates → UI reflects subscribed state
 4. Toggle anytime → Cookie persists across sessions
+5. Invalid tokens detected → Automatic cleanup and recreation
 
 **Security:**
 - httpOnly prevents JavaScript access
 - Server-side validation on every request
 - No external auth dependencies
+- Server Actions prevent client-side API exposure
 
 ---
 
@@ -108,25 +113,41 @@ Next.js 16.2.3 news website with subscription paywall and optimized caching.
 
 ### 6. Caching Strategy
 
-#### Server-Side (ISR)
+#### Modern Caching Architecture
 
-| Endpoint | Revalidate | Rationale | Cache Tags |
-|----------|-----------|-----------|------------|
-| `/api/articles/[id]` | 3600s (1h) | Articles rarely change | `['articles', 'article-${id}']` |
-| `/api/articles` (search) | 60s | Search needs fresh data | `['articles']` |
-| `/api/articles` (lists) | 300s (5m) | Static lists cache longer | `['articles']` |
-| `/api/breaking-news` | 300s (5m) | Balance freshness/performance | `['breaking-news']` |
-| `/api/categories` | 3600s (1h) | Categories change rarely | `['categories']` |
-| `/api/subscription/*` | None | User-specific data | N/A |
+**Next.js 16 "use cache" Directive:**
+- All data fetching functions use `'use cache'` directive
+- Cache profiles defined in `lib/cache-config.ts`
+- Centralized configuration with CACHE_PROFILES
+- Environment variable overrides for deployment flexibility
 
-#### Client-Side (Cache-Control Headers)
+#### Cache Profiles
 
-| Content | Cache-Control | Effect |
-|---------|---------------|--------|
-| Articles | `public, s-maxage=3600, stale-while-revalidate=7200` | CDN: 1h fresh, 2h stale window |
-| Article Lists | `public, s-maxage=60-300, stale-while-revalidate=600` | CDN: 1-5m fresh, 10m stale window |
-| Breaking News | `public, s-maxage=300, stale-while-revalidate=600` | CDN: 5m fresh, 10m stale window |
-| Categories | `public, s-maxage=3600, stale-while-revalidate=7200` | CDN: 1h fresh, 2h stale window |
+| Profile | Revalidate | Stale | Use Case | Tagged |
+|---------|-----------|-------|----------|--------|
+| `article` | 3600s (1h) | 7200s (2h) | Individual articles | `['articles', 'article-${slug}']` |
+| `articleList` | 300s (5m) | 600s (10m) | Homepage, featured, trending | `['articles']` |
+| `search` | 60s (1m) | 600s (10m) | Search/category results | `['articles']` |
+| `breakingNews` | 300s (5m) | 600s (10m) | Breaking news banner | `['breaking-news']` |
+| `categories` | 3600s (1h) | 7200s (2h) | Category dropdown | `['categories']` |
+
+#### Data Layer (`lib/data/`)
+
+| Function | Cache Profile | Tags | "use cache" |
+|----------|--------------|------|-------------|
+| `getArticle(slug)` | `article` | article-specific + global | ✓ |
+| `getArticles(params)` | `search` or `articleList` | global | ✓ |
+| `getFeaturedArticles(limit)` | `articleList` | global | ✓ |
+| `getTrendingArticles(limit)` | `articleList` | global | ✓ |
+| `getBreakingNews()` | `breakingNews` | global | ✓ |
+| `getCategories()` | `categories` | global | ✓ |
+
+**Benefits:**
+- Server-side caching with ISR (Incremental Static Regeneration)
+- CDN edge caching with stale-while-revalidate
+- On-demand revalidation via cache tags
+- No client-side fetching overhead
+- Automatic background revalidation
 
 #### Performance Impact
 
@@ -179,23 +200,38 @@ Next.js 16.2.3 news website with subscription paywall and optimized caching.
 
 ### 9. Component Architecture
 
-**Server Components (default):**
-- Article pages
-- Homepage
+**Server Components (default - async data fetching):**
+- **BreakingNewsBanner** - Fetches breaking news directly, cached 5min
+- **FeaturedArticles** - Homepage featured grid, server-side rendered
+- **TrendingArticles** - Article sidebar, server-side with filtering
+- Article pages - Direct server-side rendering
+- Homepage layout
 - Headers/footers
-- Reduces client JavaScript
-- Direct API access
+- Static content components
 
-**Client Components ('use client'):**
-- SubscribeButton (interactive state)
-- Search (useSearchParams, debounce)
-- Error boundary (reset function)
-- SubscriptionContext (React Context)
+**Benefits:**
+- Zero client JavaScript for these components
+- Direct database/API access
+- Better performance and SEO
+- Automatic code splitting
+
+**Client Components ('use client' - interactivity required):**
+- **SubscribeButton** - Interactive subscription toggle
+- **ArticleContent** - Subscription-dependent rendering
+- **Search page** - useSearchParams, debounce, form state
+- **Error boundaries** - Reset function, error handling
+- **SubscriptionContext** - React Context provider
 
 **Loading States:**
 - ArticleGridSkeleton (reusable, configurable count)
-- Suspense boundaries for async components
-- Prevents layout shift
+- Suspense boundaries wrap async Server Components
+- Prevents layout shift and improves perceived performance
+
+**Architecture Pattern:**
+- Server Components by default (better performance)
+- Client Components only when interactivity needed
+- Hybrid components (Server wrapper → Client child)
+- Example: `Article.tsx` (Server) → `ArticleContent.tsx` (Client)
 
 ---
 
@@ -203,15 +239,15 @@ Next.js 16.2.3 news website with subscription paywall and optimized caching.
 
 ```
 app/
-  api/                      # API Route Handlers (proxy pattern)
-    articles/               # List/search
-    articles/[id]/          # Single article
-    breaking-news/          # Breaking news
-    categories/             # Categories
-    subscription/           # Auth endpoints
-      create/               
+  actions/                  # Server Actions
+    subscription.ts         # Subscribe, unsubscribe, check status
+  api/                      # API Route Handlers (minimal - for Client Components only)
+    articles/               
+      route.ts              # List/search (used by Search page)
+    categories/             
+      route.ts              # Categories dropdown (used by Search page)
   articles/[...slug]/       # Dynamic article pages
-    page.tsx                
+    page.tsx                # With generateStaticParams (top 50 pre-rendered)
     not-found.tsx           # Article 404
   search/                   
     page.tsx                # Search with Suspense
@@ -222,9 +258,13 @@ app/
   globals.css               
 
 components/                 # Reusable UI
+  article/                  
+    ArticleContent.tsx      # Client component for paywall logic
   breaking-news-banner/     
+    BreakingNewsBanner.tsx  # Server Component (async)
   buttons/                  # SubscribeButton, LinkButton
-  featured-articles/        
+  FeaturedArticles/         
+    FeaturedArticles.tsx    # Server Component (async)
   footers/                  
   headers/                  
   heroes/                   # DefaultHero, ArticleHero
@@ -233,46 +273,72 @@ components/                 # Reusable UI
   skeletons/                # Loading states
   subscribe-cta/            
   trending-articles/        
+    TrendingArticles.tsx    # Server Component (async)
 
 contexts/                   
   SubscriptionContext.tsx   # Global subscription state
 
 lib/                        
+  data/                     # Server-side data layer
+    articles.ts             # Article fetching with cache profiles
+    breaking-news.ts        # Breaking news with "use cache"
+    categories.ts           # Categories with "use cache"
+    index.ts                # Barrel exports
   api-config.ts             # API base URL, headers
+  cache-config.ts           # CACHE_PROFILES, CACHE_TAGS
+  search-config.ts          # Search limits and debounce settings
   utils.ts                  # formatCategory, formatDate
 
 page-components/            # Page logic (avoids App Router conflicts)
-  Article.tsx               
-  Home.tsx                  
-  Search.tsx                
+  Article.tsx               # Server Component
+  Home.tsx                  # Server Component
+  Search.tsx                # Client Component
 ```
 
 **Key Patterns:**
-- API proxy pattern (all external calls through `/app/api/*`)
-- Server-first architecture
-- Component modularity
-- Separation of concerns
+- **Server-first architecture** - Server Components by default
+- **Data layer separation** - `lib/data/` abstracts all API calls
+- **Server Actions** - Mutations via `app/actions/` (no API routes needed)
+- **Static generation** - Top 50 articles pre-rendered at build time
+- **Modern caching** - "use cache" directive with cache profiles
+- Component modularity and separation of concerns
 
 ---
 
-### 11. API Routes
+### 11. API Routes & Server Actions
 
-| Route | Method | Purpose | Cache |
-|-------|--------|---------|-------|
-| `/api/articles` | GET | List/search articles | 60s (search) / 300s (list) |
-| `/api/articles/[id]` | GET | Single article | 3600s |
-| `/api/breaking-news` | GET | Breaking news banner | 300s |
-| `/api/categories` | GET | Category list | 3600s |
-| `/api/subscription/create` | POST | Create subscription | None |
-| `/api/subscription` | GET | Check status | None |
-| `/api/subscription` | POST | Activate | None |
-| `/api/subscription` | DELETE | Deactivate | None |
+#### API Routes (Client Component Support)
+
+**Note:** Most components use the `lib/data/` layer directly (Server Components). API routes exist only for Client Components that need to fetch data.
+
+| Route | Method | Purpose | Used By | Cache Profile |
+|-------|--------|---------|---------|--------------|
+| `/api/articles` | GET | List/search articles | Search.tsx | `search` / `articleList` |
+| `/api/categories` | GET | Category list | Search.tsx | `categories` |
 
 **Benefits:**
-- Centralized caching
+- Minimal API surface (only 2 routes for Client Component needs)
+- Server Components bypass API routes entirely
+- Centralized caching via `cache-config.ts`
 - API keys hidden server-side
 - Consistent error handling
-- Cache-Control header injection
+
+#### Server Actions (Mutations)
+
+| Action | File | Purpose | Auth |
+|--------|------|---------|------|
+| `getSubscriptionStatus()` | `app/actions/subscription.ts` | Check subscription | Cookie |
+| `subscribe()` | `app/actions/subscription.ts` | Create & activate subscription | Cookie |
+| `unsubscribe()` | `app/actions/subscription.ts` | Deactivate subscription | Cookie |
+| `createSubscription()` | `app/actions/subscription.ts` | Generate token | None |
+| `activateSubscription()` | `app/actions/subscription.ts` | Activate token | Cookie |
+
+**Benefits:**
+- Type-safe mutations (TypeScript end-to-end)
+- No API route boilerplate
+- Automatic revalidation
+- Better security (no client-exposed endpoints)
+- Direct integration with React components
 
 ---
 
