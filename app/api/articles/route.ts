@@ -1,23 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { API_BASE_URL, API_HEADERS } from '@/lib/api-config';
-import { CACHE_CONFIG } from '@/lib/cache-config';
+import { CACHE_PROFILES, CACHE_TAGS } from '@/lib/cache-config';
 
 export async function GET(request: NextRequest) {
     try {
-        const { searchParams } = new URL(request.url);
+        const searchParams = request.nextUrl.searchParams;
         const queryString = searchParams.toString();
         const url = `${API_BASE_URL}/articles${queryString ? `?${queryString}` : ''}`;
 
         const isSearch = searchParams.get('search') || searchParams.get('category');
-        const revalidateTime = isSearch 
-            ? CACHE_CONFIG.REVALIDATE.ARTICLES_SEARCH 
-            : CACHE_CONFIG.REVALIDATE.ARTICLES_LIST;
+        const cacheProfile = isSearch ? CACHE_PROFILES.search : CACHE_PROFILES.articleList;
 
         const response = await fetch(url, {
             headers: API_HEADERS,
             next: { 
-                revalidate: revalidateTime,
-                tags: [CACHE_CONFIG.TAGS.ARTICLES]
+                revalidate: cacheProfile.revalidate,
+                tags: [CACHE_TAGS.ARTICLES]
             }
         });
 
@@ -31,11 +29,18 @@ export async function GET(request: NextRequest) {
         const data = await response.json();
         return NextResponse.json(data, {
             headers: {
-                'Cache-Control': `public, s-maxage=${revalidateTime}, stale-while-revalidate=${CACHE_CONFIG.STALE.LISTS}`
+                'Cache-Control': `public, s-maxage=${cacheProfile.revalidate}, stale-while-revalidate=${cacheProfile.stale}`
             }
         });
     } catch (error) {
-        console.error('API proxy error:', error);
+        // Suppress Next.js prerender interruption errors during build
+        const isPreRenderError = error && typeof error === 'object' && 'digest' in error && 
+                                 error.digest === 'NEXT_PRERENDER_INTERRUPTED';
+        
+        if (!isPreRenderError) {
+            console.error('API proxy error:', error);
+        }
+        
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }
