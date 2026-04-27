@@ -16,15 +16,20 @@ export default function SubscribeButton({
     const [isProcessing, setIsProcessing] = useState(false);
 
     const handleClick = async () => {
+        console.log('[SubscribeButton] handleClick called, isSubscribed:', isSubscribed);
         setIsProcessing(true);
         try {
             if (isSubscribed) {
+                console.log('[SubscribeButton] Calling unsubscribe...');
                 await unsubscribe();
+                console.log('[SubscribeButton] Unsubscribe complete');
             } else {
+                console.log('[SubscribeButton] Calling subscribe...');
                 await subscribe();
+                console.log('[SubscribeButton] Subscribe complete');
             }
         } catch (error) {
-            console.error('Subscription action failed:', error);
+            console.error('[SubscribeButton] Action failed:', error);
             alert('Failed to process subscription. Please try again.');
         } finally {
             setIsProcessing(false);

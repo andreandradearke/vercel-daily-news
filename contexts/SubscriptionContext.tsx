@@ -1,6 +1,11 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import {
+    getSubscriptionStatus,
+    subscribe as subscribeAction,
+    unsubscribe as unsubscribeAction
+} from '@/app/actions/subscription';
 
 interface SubscriptionContextType {
     isSubscribed: boolean;
@@ -16,16 +21,19 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
 
     const checkStatus = async () => {
+        console.log('[Context] Checking subscription status...');
         try {
-            const response = await fetch('/api/subscription');
-            if (response.ok) {
-                const data = await response.json();
-                setIsSubscribed(data.data?.status === 'active');
+            const result = await getSubscriptionStatus();
+            console.log('[Context] Status check result:', result);
+            if (result.success && result.data) {
+                console.log('[Context] Setting isSubscribed to:', result.data.status === 'active');
+                setIsSubscribed(result.data.status === 'active');
             } else {
+                console.log('[Context] No valid status, setting to false. Error:', result.error);
                 setIsSubscribed(false);
             }
         } catch (error) {
-            console.error('Failed to check subscription status:', error);
+            console.error('[Context] Failed to check subscription status:', error);
             setIsSubscribed(false);
         } finally {
             setIsLoading(false);
@@ -33,48 +41,23 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     };
 
     const subscribe = async () => {
+        console.log('[Context] Subscribe called');
         try {
             setIsLoading(true);
 
-            // Get current token if it exists
-            const statusResponse = await fetch('/api/subscription');
+            console.log('[Context] Calling subscribeAction...');
+            const result = await subscribeAction();
+            console.log('[Context] Subscribe action result:', result);
 
-            if (statusResponse.ok) {
-                const statusData = await statusResponse.json();
-
-                // Already subscribed - no action needed
-                if (statusData.data?.status === 'active') {
-                    setIsSubscribed(true);
-                    return;
-                }
-                // Has token but inactive - will activate below
-
-            } else if (statusResponse.status === 400) { // no token exists
-                const createResponse = await fetch('/api/subscription/create', {
-                    method: 'POST'
-                });
-
-                if (!createResponse.ok) {
-                    throw new Error('Failed to create subscription token');
-                }
-
-            } else {
-                const errorText = await statusResponse.text();
-                throw new Error(`Failed to check subscription status (${statusResponse.status}): ${errorText}`);
+            if (!result.success) {
+                console.error('[Context] Subscribe failed:', result.error);
+                throw new Error(result.error || 'Failed to subscribe');
             }
 
-            // Activate the subscription (either new or inactive)
-            const activateResponse = await fetch('/api/subscription', {
-                method: 'POST'
-            });
-
-            if (!activateResponse.ok) {
-                throw new Error('Failed to activate subscription');
-            }
-
+            console.log('[Context] Subscribe successful, setting isSubscribed to true');
             setIsSubscribed(true);
         } catch (error) {
-            console.error('Failed to subscribe:', error);
+            console.error('[Context] Subscribe error:', error);
             throw error;
         } finally {
             setIsLoading(false);
@@ -82,19 +65,23 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     };
 
     const unsubscribe = async () => {
+        console.log('[Context] Unsubscribe called');
         try {
             setIsLoading(true);
-            const response = await fetch('/api/subscription', {
-                method: 'DELETE'
-            });
 
-            if (!response.ok) {
-                throw new Error('Failed to unsubscribe');
+            console.log('[Context] Calling unsubscribeAction...');
+            const result = await unsubscribeAction();
+            console.log('[Context] Unsubscribe action result:', result);
+
+            if (!result.success) {
+                console.error('[Context] Unsubscribe failed:', result.error);
+                throw new Error(result.error || 'Failed to unsubscribe');
             }
 
+            console.log('[Context] Unsubscribe successful, setting isSubscribed to false');
             setIsSubscribed(false);
         } catch (error) {
-            console.error('Failed to unsubscribe:', error);
+            console.error('[Context] Unsubscribe error:', error);
             throw error;
         } finally {
             setIsLoading(false);
