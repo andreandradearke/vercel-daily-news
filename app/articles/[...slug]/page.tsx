@@ -1,21 +1,40 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import Article from '@/page-components/Article';
-import { API_BASE_URL, API_HEADERS } from '@/lib/api-config';
+import { getArticle, getArticles } from '@/lib/data';
 
-async function getArticle(slug: string) {
+/**
+ * Generate static paths for popular articles at build time
+ */
+export async function generateStaticParams() {
     try {
-        const response = await fetch(`${API_BASE_URL}/articles/${slug}`, {
-            headers: API_HEADERS,
-            next: { revalidate: 3600 }
+        // Fetch featured and trending articles to pre-render them
+        const [featured, trending] = await Promise.all([
+            getArticles({ featured: true, limit: 20 }),
+            getArticles({ trending: true, limit: 30 })
+        ]);
+
+        // Combine and deduplicate
+        const articlesMap = new Map();
+        [...featured, ...trending].forEach(article => {
+            articlesMap.set(article.slug, article);
         });
 
-        if (!response.ok) return null;
-        const data = await response.json();
-        return data.data;
-    } catch {
-        return null;
+        // Return array of slug params
+        return Array.from(articlesMap.values()).map(article => ({
+            slug: article.slug.split('/') // Convert "slug" to ["slug"] or ["category/slug"] to ["category", "slug"]
+        }));
+    } catch (error) {
+        console.error('Error generating static params:', error);
+        return []; // Return empty array on error to allow dynamic rendering
     }
 }
+
+/**
+ * Allow dynamic params for articles not pre-rendered
+ * Articles not in generateStaticParams will be rendered on-demand
+ */
+export const dynamicParams = true;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string[] }> }): Promise<Metadata> {
     const { slug } = await params;
@@ -49,5 +68,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     const { slug } = await params;
     const articleSlug = slug.join('/');
 
-    return <Article slug={articleSlug} />;
+    const article = await getArticle(articleSlug);
+
+    if (!article) {
+        notFound();
+    }
+
+    return <Article article={article} />;
 }
