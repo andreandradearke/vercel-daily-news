@@ -30,12 +30,6 @@ export async function generateStaticParams() {
     }
 }
 
-/**
- * Allow dynamic params for articles not pre-rendered
- * Articles not in generateStaticParams will be rendered on-demand
- */
-export const dynamicParams = true;
-
 export async function generateMetadata({ params }: { params: Promise<{ slug: string[] }> }): Promise<Metadata> {
     const { slug } = await params;
     const articleSlug = slug.join('/');
