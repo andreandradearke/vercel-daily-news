@@ -1,5 +1,5 @@
 import { API_BASE_URL, API_HEADERS } from '@/lib/api-config';
-import { CACHE_CONFIG } from '@/lib/cache-config';
+import { CACHE_PROFILES, CACHE_TAGS } from '@/lib/cache-config';
 
 /**
  * Article Types
@@ -41,14 +41,16 @@ export interface ArticleListItem {
 
 /**
  * Fetch a single article by slug
+ * Uses 'article' cache profile: 1hr revalidate, 2hr stale
  */
 export async function getArticle(slug: string): Promise<Article | null> {
+    'use cache';
     try {
         const response = await fetch(`${API_BASE_URL}/articles/${slug}`, {
             headers: API_HEADERS,
             next: { 
-                revalidate: CACHE_CONFIG.REVALIDATE.ARTICLES_INDIVIDUAL,
-                tags: [CACHE_CONFIG.TAGS.ARTICLES, CACHE_CONFIG.TAGS.article(slug)]
+                revalidate: CACHE_PROFILES.article.revalidate,
+                tags: [CACHE_TAGS.ARTICLES, CACHE_TAGS.article(slug)]
             }
         });
 
@@ -67,6 +69,7 @@ export async function getArticle(slug: string): Promise<Article | null> {
 
 /**
  * Fetch articles with optional filters
+ * Cache strategy varies: 'search' for search/category, 'articleList' otherwise
  */
 export async function getArticles(params?: {
     featured?: boolean;
@@ -75,6 +78,7 @@ export async function getArticles(params?: {
     category?: string;
     limit?: number;
 }): Promise<ArticleListItem[]> {
+    'use cache';
     try {
         const searchParams = new URLSearchParams();
         
@@ -88,15 +92,13 @@ export async function getArticles(params?: {
         
         // Determine cache strategy based on query type
         const isSearch = params?.search || params?.category;
-        const revalidateTime = isSearch 
-            ? CACHE_CONFIG.REVALIDATE.ARTICLES_SEARCH 
-            : CACHE_CONFIG.REVALIDATE.ARTICLES_LIST;
+        const cacheProfile = isSearch ? CACHE_PROFILES.search : CACHE_PROFILES.articleList;
 
         const response = await fetch(url, {
             headers: API_HEADERS,
             next: { 
-                revalidate: revalidateTime,
-                tags: [CACHE_CONFIG.TAGS.ARTICLES]
+                revalidate: cacheProfile.revalidate,
+                tags: [CACHE_TAGS.ARTICLES]
             }
         });
 

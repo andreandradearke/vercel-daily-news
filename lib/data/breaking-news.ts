@@ -1,5 +1,5 @@
 import { API_BASE_URL, API_HEADERS } from '@/lib/api-config';
-import { CACHE_CONFIG } from '@/lib/cache-config';
+import { CACHE_PROFILES, CACHE_TAGS } from '@/lib/cache-config';
 
 /**
  * Breaking News Types
@@ -16,14 +16,16 @@ export interface BreakingNews {
 
 /**
  * Fetch the current breaking news item
+ * Uses 'breakingNews' cache profile: 5min revalidate, 10min stale
  */
 export async function getBreakingNews(): Promise<BreakingNews | null> {
+    'use cache';
     try {
         const response = await fetch(`${API_BASE_URL}/breaking-news`, {
             headers: API_HEADERS,
             next: { 
-                revalidate: CACHE_CONFIG.REVALIDATE.BREAKING_NEWS,
-                tags: [CACHE_CONFIG.TAGS.BREAKING_NEWS]
+                revalidate: CACHE_PROFILES.breakingNews.revalidate,
+                tags: [CACHE_TAGS.BREAKING_NEWS]
             }
         });
 
