@@ -21,19 +21,15 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
 
     const checkStatus = async () => {
-        console.log('[Context] Checking subscription status...');
         try {
             const result = await getSubscriptionStatus();
-            console.log('[Context] Status check result:', result);
             if (result.success && result.data) {
-                console.log('[Context] Setting isSubscribed to:', result.data.status === 'active');
                 setIsSubscribed(result.data.status === 'active');
             } else {
-                console.log('[Context] No valid status, setting to false. Error:', result.error);
                 setIsSubscribed(false);
             }
         } catch (error) {
-            console.error('[Context] Failed to check subscription status:', error);
+            console.error('Failed to check subscription status:', error);
             setIsSubscribed(false);
         } finally {
             setIsLoading(false);
@@ -41,23 +37,17 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     };
 
     const subscribe = async () => {
-        console.log('[Context] Subscribe called');
         try {
             setIsLoading(true);
-
-            console.log('[Context] Calling subscribeAction...');
             const result = await subscribeAction();
-            console.log('[Context] Subscribe action result:', result);
 
             if (!result.success) {
-                console.error('[Context] Subscribe failed:', result.error);
                 throw new Error(result.error || 'Failed to subscribe');
             }
 
-            console.log('[Context] Subscribe successful, setting isSubscribed to true');
             setIsSubscribed(true);
         } catch (error) {
-            console.error('[Context] Subscribe error:', error);
+            console.error('Subscribe error:', error);
             throw error;
         } finally {
             setIsLoading(false);
@@ -65,23 +55,17 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     };
 
     const unsubscribe = async () => {
-        console.log('[Context] Unsubscribe called');
         try {
             setIsLoading(true);
-
-            console.log('[Context] Calling unsubscribeAction...');
             const result = await unsubscribeAction();
-            console.log('[Context] Unsubscribe action result:', result);
 
             if (!result.success) {
-                console.error('[Context] Unsubscribe failed:', result.error);
                 throw new Error(result.error || 'Failed to unsubscribe');
             }
 
-            console.log('[Context] Unsubscribe successful, setting isSubscribed to false');
             setIsSubscribed(false);
         } catch (error) {
-            console.error('[Context] Unsubscribe error:', error);
+            console.error('Unsubscribe error:', error);
             throw error;
         } finally {
             setIsLoading(false);
