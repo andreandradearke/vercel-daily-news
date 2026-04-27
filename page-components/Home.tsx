@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import BreakingNewsBanner from "@/components/breaking-news-banner/BreakingNewsBanner";
-import FeaturedArticles from "@/components/featured-articles/featured-articles";
+import FeaturedArticles from "@/components/FeaturedArticles/FeaturedArticles";
 import DefaultHero from "@/components/heroes/DefaultHero";
 import ArticleGridSkeleton from '@/components/skeletons/ArticleGridSkeleton';
 
