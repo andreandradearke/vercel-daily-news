@@ -1,5 +1,5 @@
-import LinkButton from '../buttons/LinkButton';
-import SubscribeButton from '../buttons/SubscribeButton';
+import LinkButton from '@/components/buttons/LinkButton';
+import SubscribeButton from '@/components/buttons/SubscribeButton';
 import Image from 'next/image';
 
 interface DefaultHeroProps {

@@ -1,4 +1,4 @@
-import ArticleCardSkeleton from './ArticleCardSkeleton';
+import ArticleCardSkeleton from '@/components/skeletons/ArticleCardSkeleton';
 
 interface ArticleGridSkeletonProps {
     count?: number;
