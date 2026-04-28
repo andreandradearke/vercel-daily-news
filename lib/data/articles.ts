@@ -1,5 +1,6 @@
 import { API_BASE_URL, API_HEADERS } from '@/lib/api-config';
 import { CACHE_PROFILES, CACHE_TAGS } from '@/lib/cache-config';
+import { sortArticlesByDate } from '@/lib/utils';
 
 /**
  * Article Types
@@ -107,7 +108,10 @@ export async function getArticles(params?: {
         }
 
         const data = await response.json();
-        return data.data || [];
+        const articles = data.data || [];
+        
+        // Sort by publishedAt date (most recent first)
+        return sortArticlesByDate(articles);
     } catch (error) {
         console.error('Error fetching articles:', error);
         return [];

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { API_BASE_URL, API_HEADERS } from '@/lib/api-config';
 import { CACHE_PROFILES, CACHE_TAGS } from '@/lib/cache-config';
+import { sortArticlesByDate } from '@/lib/utils';
 
 export async function GET(request: NextRequest) {
     try {
@@ -27,6 +28,12 @@ export async function GET(request: NextRequest) {
         }
 
         const data = await response.json();
+        
+        // Sort articles by publishedAt date (most recent first)
+        if (data.data && Array.isArray(data.data)) {
+            sortArticlesByDate(data.data);
+        }
+        
         return NextResponse.json(data, {
             headers: {
                 'Cache-Control': `public, s-maxage=${cacheProfile.revalidate}, stale-while-revalidate=${cacheProfile.stale}`
