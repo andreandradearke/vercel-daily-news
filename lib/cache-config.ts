@@ -1,11 +1,4 @@
 /**
- * Cache Configuration for Next.js 16
- * 
- * Defines cache profiles using the modern "use cache" directive and cacheLife() API.
- * These profiles control both server-side and CDN caching behavior.
- */
-
-/**
  * Cache Life Profiles
  * Define revalidation and stale-while-revalidate times for different content types
  */
