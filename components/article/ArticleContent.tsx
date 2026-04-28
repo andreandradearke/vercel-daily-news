@@ -5,7 +5,6 @@ import type { Article } from '@/lib/data';
 
 interface ArticleContentProps {
     content: Article['content'];
-    teaser: string;
     paywallComponent: React.ReactNode;
 }
 
@@ -52,7 +51,7 @@ function renderContentBlock(block: Article['content'][0], index: number) {
     }
 }
 
-export default function ArticleContent({ content, teaser, paywallComponent }: ArticleContentProps) {
+export default function ArticleContent({ content, paywallComponent }: ArticleContentProps) {
     const { isSubscribed } = useSubscription();
 
     if (isSubscribed) {

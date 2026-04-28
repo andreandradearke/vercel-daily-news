@@ -61,7 +61,6 @@ export default function Article({ article }: ArticleProps) {
 
             <ArticleContent
                 content={article.content}
-                teaser={teaser}
                 paywallComponent={<Paywall teaser={teaser} />}
             />
 
