@@ -51,13 +51,16 @@ export default function SubscribeButton({
             disabled={isProcessing}
             className={`
                 ${sizeClasses[size]}
-                bg-black text-white font-medium rounded
-                hover:bg-gray-800 transition-colors
+                ${isSubscribed
+                    ? 'bg-gray-300 hover:bg-gray-400 text-gray-800'
+                    : 'bg-black text-white hover:bg-gray-800'}
+                font-medium rounded
+                transition-colors
                 disabled:opacity-50 disabled:cursor-not-allowed
                 ${className}
             `}
         >
-            {isProcessing ? 'Processing...' : isSubscribed ? 'Subscribed ✓' : 'Subscribe'}
+            {isProcessing ? 'Processing...' : isSubscribed ? 'Subscribed \u2713' : 'Subscribe'}
         </button>
     );
 }
