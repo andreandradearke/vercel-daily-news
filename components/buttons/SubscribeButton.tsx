@@ -2,6 +2,7 @@
 
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useState } from 'react';
+import { ICONS } from '@/lib/icons';
 
 interface SubscribeButtonProps {
     size?: 'sm' | 'md' | 'lg';
@@ -60,7 +61,7 @@ export default function SubscribeButton({
                 ${className}
             `}
         >
-            {isProcessing ? 'Processing...' : isSubscribed ? 'Subscribed \u2713' : 'Subscribe'}
+            {isProcessing ? 'Processing...' : isSubscribed ? `Subscribed ${ICONS.CHECKMARK}` : 'Subscribe'}
         </button>
     );
 }
