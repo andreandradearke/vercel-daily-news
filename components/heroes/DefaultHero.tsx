@@ -39,7 +39,7 @@ export default function DefaultHero({
                 <h1 className="text-3xl lg:text-4xl font-bold">{headline}</h1>
                 <p className="text-sm text-gray-400">{description}</p>
                 <div className="flex gap-4">
-                    <LinkButton text={ctaButtonText} type="secondary" href={ctaButtonHref} />
+                    <LinkButton text={ctaButtonText} href={ctaButtonHref} />
                     <SubscribeButton size="md" />
                 </div>
             </div>

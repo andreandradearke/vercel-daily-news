@@ -1,21 +1,19 @@
 import Link from 'next/link';
+import { ICONS } from '@/lib/icons';
 
 interface LinkButtonProps {
     text: string;
-    type: 'primary' | 'secondary';
     href: string;
 }
 
-export default function LinkButton({ text, type, href }: LinkButtonProps) {
+export default function LinkButton({ text, href }: LinkButtonProps) {
     const baseClasses = "px-4 py-2 rounded inline-block";
-    const typeClasses = type === 'primary'
-        ? "bg-black text-white"
-        : "bg-white text-black border border-black";
+    const colorClasses = "bg-white text-black border border-black";
 
     return (
-        <Link href={href} className={`${baseClasses} ${typeClasses} cursor-pointer`}>
+        <Link href={href} className={`${baseClasses} ${colorClasses} cursor-pointer`}>
             {text}
-            {type === 'secondary' && <span> &#129106;</span>}
+            <span> {ICONS.RIGHT_ARROW}</span>
         </Link>
     );
 }
